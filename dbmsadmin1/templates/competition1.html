@@ -56,6 +56,11 @@
             border-radius: 3px;
         }
 
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
         /* Submit button styles */
         input[type="submit"] {
             margin-top: 20px;
@@ -83,8 +88,8 @@
                 <tr>
                     <th>User ID</th>
                     <th>Username</th>
-                    <th>Round 1 Marks</th>
-                    <th>Round 2 Marks</th>
+                    
+                    <th>Attendance</th>
                 </tr>
             </thead>
             <tbody>
@@ -92,14 +97,15 @@
                 <tr>
                     <td>{{ user.user_id }}</td>
                     <td>{{ user.username }}</td>
-                    <td><input type="number" name="round1_{{ user.user_id }}" value="{{ user.round1_marks }}"></td>
-                    <td><input type="number" name="round2_{{ user.user_id }}" value="{{ user.round2_marks }}"></td>
+                    
+<td><input type="checkbox" name="attendance_{{ user.user_id }}"></td>
+
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         <!-- Remove the inner form and directly submit the outer form -->
-        <input style=margin-left:45% type="submit" value="Submit">
+        <input style="margin-left: 45%;" type="submit" value="Submit">
     </form>
 </body>
 

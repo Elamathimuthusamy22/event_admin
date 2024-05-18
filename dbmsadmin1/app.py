@@ -15,6 +15,8 @@ winner1_collection = db['winner1']
 winner2_collection = db['winner2']
 competition1_collection = db['competition1']
 competition2_collection = db['competition2']
+participants1_collection=db['participants1']
+participants2_collection=db['participants2']
 
 @app.route('/')
 def index():
@@ -48,8 +50,36 @@ def competition_selection():
 def competition1():
     # Restrict admin1 from entering marks for competition1
     if 'role' in session and session['role'] != 'admin':
-        return render_template('error.html', message="Admin1 is not allowed to enter marks for Competition 1.")
+        return render_template('error.html', message="Admin is not allowed to mark attendance for Competition 2.")
+    
+    if request.method == 'POST':
+        for key, value in request.form.items():
+            if key.startswith('attendance_'):
+                user_id = key.split('_')[1]
+                attendance = value
+                # Update attendance status in the participants1 table
+                competition1_collection.update_one(
+                    {'user_id': user_id},
+                    {'$set': {'event_name': 'Competition 1'}},
+                    upsert=True
+                )
+                participants1_collection.update_one(
+                    {'user_id': user_id},
+                    {'$set': {'attendance': attendance}},
+                    upsert=True
+                )
+        return redirect(url_for('competition_selection'))
+    else:
+        competition1_users = events_collection.find({'event_name': 'Competition 1'})
+        return render_template('competition1.html', competition1_users=competition1_users)
 
+
+   
+@app.route('/participants1', methods=['GET', 'POST'])
+def participants1():
+    if 'role' in session and session['role'] != 'admin':
+        return render_template('error.html', message="Admin1 is not allowed to enter marks for Competition 1.")
+    
     if request.method == 'POST':
         user_data = {}
         for key, value in request.form.items():
@@ -57,18 +87,27 @@ def competition1():
                 user_id = key.split('_')[1]
                 round_number = key.split('_')[0][-1]
                 round_marks = int(value)
-                competition1_collection.update_one(
+                user_info = users_collection.find_one({'_id': user_id})
+                username = user_info.get('username', 'Unknown')  # Fetch 'username' field
+                participants1_collection.update_one(
                     {'user_id': user_id},
-                    {'$set': {f'round{round_number}_marks': round_marks}},
+                    {'$set': {f'round{round_number}_marks': round_marks, 'username': username}},
                     upsert=True
                 )
-                user_info = users_collection.find_one({'_id': user_id})
-                username = user_info.get('username', 'Unknown')
+
                 if user_id in user_data:
                     user_data[user_id]['total_marks'] += round_marks
                     user_data[user_id]['round_count'] += 1
                 else:
                     user_data[user_id] = {'username': username, 'total_marks': round_marks, 'round_count': 1}
+            elif key.startswith('attendance_'):
+                user_id = key.split('_')[1]
+                attendance = value
+                participants1_collection.update_one(
+                    {'user_id': user_id},
+                    {'$set': {'attendance': attendance}},
+                    upsert=True
+                )
         for user_id, data in user_data.items():
             average_marks = data['total_marks'] / data['round_count']
             winner1_collection.update_one(
@@ -78,15 +117,45 @@ def competition1():
             )
         return redirect(url_for('competition_selection'))
     else:
-        competition1_users = events_collection.find({'event_name': 'Competition 1'})
-        return render_template('competition1.html', competition1_users=competition1_users)
-
+        participants1_users = participants1_collection.find({'attendance': 'on'})
+        return render_template('participants1.html', participants1_users=participants1_users)
 @app.route('/competition2', methods=['GET', 'POST'])
 def competition2():
-    # Restrict admin from entering marks for competition2
+    # Restrict admin1 from entering marks for competition1
+    if 'role' in session and session['role'] != 'admin1':
+        return render_template('error.html', message="Admin is not allowed to mark attendance for Competition 2.")
+    
+    if request.method == 'POST':
+        
+        for key, value in request.form.items():
+            
+            if key.startswith('attendance_'):
+                user_id = key.split('_')[1]
+                competition2_collection.update_one(
+                    {'user_id': user_id},
+                    {'$set': {'event_name': 'Competition 2'}},
+                    upsert=True
+                )
+                attendance = value
+                
+                # Update attendance status in the participants1 table
+                participants2_collection.update_one(
+                    {'user_id': user_id},
+                    {'$set': {'attendance': attendance}},
+                    upsert=True
+                )
+        return redirect(url_for('competition_selection'))
+    else:
+        competition2_users = events_collection.find({'event_name': 'Competition 2'})
+        return render_template('competition2.html', competition2_users=competition2_users)
+
+
+   
+@app.route('/participants2', methods=['GET', 'POST'])
+def participants2():
     if 'role' in session and session['role'] != 'admin1':
         return render_template('error.html', message="Admin is not allowed to enter marks for Competition 2.")
-
+    
     if request.method == 'POST':
         user_data = {}
         for key, value in request.form.items():
@@ -94,18 +163,27 @@ def competition2():
                 user_id = key.split('_')[1]
                 round_number = key.split('_')[0][-1]
                 round_marks = int(value)
-                competition2_collection.update_one(
+                user_info = users_collection.find_one({'_id': user_id})
+                username = user_info.get('username', 'Unknown')  # Fetch 'username' field
+                participants2_collection.update_one(
                     {'user_id': user_id},
-                    {'$set': {f'round{round_number}_marks': round_marks}},
+                    {'$set': {f'round{round_number}_marks': round_marks, 'username': username}},
                     upsert=True
                 )
-                user_info = users_collection.find_one({'_id': user_id})
-                username = user_info.get('username', 'Unknown')
+
                 if user_id in user_data:
                     user_data[user_id]['total_marks'] += round_marks
                     user_data[user_id]['round_count'] += 1
                 else:
                     user_data[user_id] = {'username': username, 'total_marks': round_marks, 'round_count': 1}
+            elif key.startswith('attendance_'):
+                user_id = key.split('_')[1]
+                attendance = value
+                participants2_collection.update_one(
+                    {'user_id': user_id},
+                    {'$set': {'attendance': attendance}},
+                    upsert=True
+                )
         for user_id, data in user_data.items():
             average_marks = data['total_marks'] / data['round_count']
             winner2_collection.update_one(
@@ -115,8 +193,8 @@ def competition2():
             )
         return redirect(url_for('competition_selection'))
     else:
-        competition2_users = events_collection.find({'event_name': 'Competition 2'})
-        return render_template('competition2.html', competition2_users=competition2_users)
+        participants2_users = participants2_collection.find({'attendance': 'on'})
+        return render_template('participants2.html', participants2_users=participants2_users)
 
 @app.route('/winner1', methods=['GET'])
 def winner1():

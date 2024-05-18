@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Competition 2</title>
+    <title>Present participants for Competition 2</title>
     <style>
         /* CSS styling for Competition 1 page */
 
@@ -79,30 +79,32 @@
 </head>
 
 <body>
-    <h1>Competition 2</h1>
+    <h1>Participants 2</h1>
 
     <h2>Participants:</h2>
-    <form action="{{ url_for('competition2') }}" method="post">
+    <form action="{{ url_for('participants2') }}" method="post">
         <table>
             <thead>
                 <tr>
                     <th>User ID</th>
                     <th>Username</th>
+                    <th>Round 1 Marks</th>
+                    <th>Round 2 Marks</th>
                     
-                    <th>Attendance</th>
                 </tr>
             </thead>
             <tbody>
-                {% for user in competition2_users %}
-                <tr>
-                    <td>{{ user.user_id }}</td>
-                    <td>{{ user.username }}</td>
-                    
-<td><input type="checkbox" name="attendance_{{ user.user_id }}"></td>
-
-                </tr>
-                {% endfor %}
-            </tbody>
+              {% for user in participants2_users %}
+              <tr>
+                  <td>{{ user.user_id }}</td>
+                  <td>{{ user.username }}</td>
+                  <td><input type="number" name="round1_{{ user.user_id }}" value="{{ user.round1_marks }}"></td>
+<td><input type="number" name="round2_{{ user.user_id }}" value="{{ user.round2_marks }}"></td>
+              
+            </tr>
+            {% endfor %}
+        </tbody>
+              
         </table>
         <!-- Remove the inner form and directly submit the outer form -->
         <input style="margin-left: 45%;" type="submit" value="Submit">
