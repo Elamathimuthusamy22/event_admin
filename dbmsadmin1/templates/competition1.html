@@ -88,21 +88,26 @@
                 <tr>
                     <th>User ID</th>
                     <th>Username</th>
-                    
+
                     <th>Attendance</th>
                 </tr>
             </thead>
             <tbody>
-                {% for user in competition1_users %}
+                {% for participant in competition1_participants %}
                 <tr>
-                    <td>{{ user.user_id }}</td>
-                    <td>{{ user.username }}</td>
-                    
-<td><input type="checkbox" name="attendance_{{ user.user_id }}"></td>
-
+                    <td>{{ participant.user_id }}</td>
+                    <td>{{ participant.username }}</td>
+                    <td>
+                        {% if attendance_data.get(participant.user_id, False) %}
+                        <input type="checkbox" name="attendance_{{ participant.user_id }}" checked disabled>
+                        {% else %}
+                        <input type="checkbox" name="attendance_{{ participant.user_id }}">
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
+
         </table>
         <!-- Remove the inner form and directly submit the outer form -->
         <input style="margin-left: 45%;" type="submit" value="Submit">
